@@ -13,7 +13,7 @@ venv/
 env/
 
 # Jupyter
-test.py
+test.ipynb
 
 # Generated files
 sample_notes.pdf
