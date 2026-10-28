@@ -13,7 +13,7 @@ venv/
 env/
 
 # Jupyter
-.ipynb_checkpoints/
+test.py
 
 # Generated files
 sample_notes.pdf
