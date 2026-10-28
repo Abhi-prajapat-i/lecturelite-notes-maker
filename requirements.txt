@@ -1,0 +1,8 @@
+streamlit>=1.30
+youtube-transcript-api>=1.0
+python-dotenv>=1.0
+reportlab>=4.0
+langchain-core
+langchain-text-splitters
+langchain-openrouter
+langchain-groq

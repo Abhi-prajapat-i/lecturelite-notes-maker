@@ -1,0 +1,25 @@
+# Secrets (API keys) - never commit these
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated files
+sample_notes.pdf
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
