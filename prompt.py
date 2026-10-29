@@ -37,6 +37,8 @@ The final output will be used to create study notes, so remove all communication
 - Real-world examples related to the subject
 - Important advantages, disadvantages, limitations, and use cases
 - Questions and their answers ONLY when they contain useful educational/technical information
+- Code that the teacher writes or reads out (imports, class and function names, parameters, variable names), together with the explanation of what the code does
+- Outputs or results of code that the teacher shows and explains
 - Any statement that directly teaches or explains the subject
 
 ### QUESTION-ANSWER RULE:
@@ -71,64 +73,64 @@ These are communication, not study content.
 {chunk}
 """)
 
-note_prompt = ChatPromptTemplate.from_template("""
-You are an expert academic note-making assistant.
+# The lecture is turned into notes PART BY PART (see Rag.py), so that long
+# lectures get complete notes instead of one short summary.
+note_part_prompt = ChatPromptTemplate.from_template("""
+You are an expert technical note-maker. You write COMPLETE and DETAILED study notes in a clear blog style (like a good technical article on Medium).
 
-Create clear, structured, and easy-to-understand **study notes** from the following filtered Machine Learning lecture transcript.
+You are given ONE PART of a longer lecture. Write the notes for this part only.
 
-### Instructions:
+{position_instructions}
 
-- Extract all important concepts from the transcript.
-- Organize the content using clear headings and subheadings.
-- Write concise explanations for each concept.
-- Include important definitions.
-- Include important technical terms and their meanings.
-- Include examples given by the teacher.
-- Include formulas whenever they are present.
-- Explain algorithms and their working steps when discussed.
-- Highlight important points for exams and interviews.
-- Preserve important details from the transcript.
-- Remove unnecessary repetition.
-- Use bullet points and numbered lists where appropriate.
-- Use simple and clear English.
-- Maintain the meaning of the original lecture.
-- Do not include casual conversation or classroom discussion.
-- Do not add information that is not present in the transcript.
-- Do not make the notes unnecessarily short; preserve important explanations.
-- If an important concept is explained through an example, keep the example.
-- If the transcript contains an important comparison, present it in a table when appropriate.
+Headings already written in the earlier parts of the notes (do not repeat them; if a topic continues from the previous part, continue it under a new sub-heading with `###`, do not repeat the topic):
+{previous_headings}
 
-### Recommended structure:
+### Completeness rules (most important)
+- Cover EVERY concept, definition, explanation, example, comparison, code snippet and tip in this part of the transcript. Do NOT skip anything that the teacher taught.
+- Do NOT summarize or shorten. The notes of this part should be about as detailed as the teaching content, only written more cleanly.
+- Explain each concept fully: what it is, why it is needed, how it works, an example, and when to use it, whenever the teacher covered these.
+- Keep the teacher's examples, analogies, numbers, and reasoning. Explain them in simple words.
+- Keep every comparison, advantage, disadvantage, limitation and use case that was mentioned.
 
-# Topic Name
+### Structure and style
+- Use `##` for every major topic and `###` for sub-topics. Do NOT put numbers in headings.
+- Under each heading write full explanations. Use short paragraphs (2-5 sentences) and bullet points or numbered steps where it helps.
+- Use **bold** for key terms.
+- If the teacher showed or explained code, include it in a fenced code block with the language (for example ```python). Keep imports, class names, function names and parameters exactly as stated, and add an explanation of what the code does, line by line if the teacher did so.
+- If the teacher showed or explained the output of code, show it in a separate fenced code block.
+- Use a quote line starting with `> ` for tips, warnings, and common mistakes the teacher mentioned.
+- Use a Markdown table when two or more things are compared.
+- Do NOT use LaTeX or dollar signs. Write symbols in plain text or Unicode (λ, ≤, ≥, →, ×) and formulas in plain text or in a code block.
+- Do NOT use emojis.
+- Do NOT include greetings, casual talk or classroom discussion.
 
-## 1. Introduction
-Explain the basic idea of the topic.
+### Accuracy rules
+- Use ONLY the information in the transcript part below. Do NOT add outside knowledge, extra examples, extra code or extra outputs.
+- Do NOT invent code, parameters, or outputs. If the teacher only described code in words, describe it in words.
+- If something is unclear in the transcript, leave it out instead of guessing.
 
-## 2. Important Concepts
-Explain each major concept clearly.
-
-## 3. Important Definitions
-List important definitions.
-
-## 4. Examples
-Include useful examples from the lecture.
-
-## 5. Algorithms / Methods
-Explain the algorithms or methods discussed.
-
-## 6. Important Points
-List the key points to remember.
-
-## 7. Exam / Interview Points
-Mention concepts that are particularly important for exams or interviews.
-
-## 8. Quick Revision
-Give a short summary of the most important concepts at the end.
-
-### Important:
-The notes must be based **only on the provided transcript**. Do not hallucinate, assume, or introduce external information.
-
-Filtered lecture transcript:
+### Transcript part:
 {transcript}
+""")
+
+
+takeaways_prompt = ChatPromptTemplate.from_template("""
+Below are complete study notes of a lecture.
+
+Write the final section of the notes, in this exact format:
+
+## Key Takeaways
+(8-12 bullet points that summarize the most important things to remember from the whole lecture)
+
+## Quick Revision
+(a short bullet list: one line per major topic of the notes, saying in one sentence what it is or when to use it)
+
+Rules:
+- Use ONLY the information in the notes. Do not add anything new.
+- Do NOT use LaTeX, emojis or tables.
+- Remove duplicate.
+- Return only these two sections, nothing else.
+
+### Notes:
+{notes}
 """)

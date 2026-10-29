@@ -124,8 +124,34 @@ def _clean(text, unicode_ok):
     return text
 
 
+_LATEX_MAP = {
+    r"\lambda": "λ", r"\alpha": "α", r"\beta": "β", r"\gamma": "γ",
+    r"\delta": "δ", r"\theta": "θ", r"\mu": "μ", r"\sigma": "σ",
+    r"\pi": "π", r"\epsilon": "ε", r"\omega": "ω",
+    r"\rightarrow": "→", r"\to": "→", r"\leftarrow": "←",
+    r"\leq": "≤", r"\le": "≤", r"\geq": "≥", r"\ge": "≥",
+    r"\neq": "≠", r"\approx": "≈", r"\times": "×", r"\cdot": "·",
+    r"\infty": "∞", r"\sum": "Σ", r"\pm": "±",
+}
+
+
+def _latex_to_text(text):
+    """Turn simple LaTeX such as $\\lambda = 1$ into plain text: λ = 1."""
+    def _convert(match):
+        inner = match.group(1)
+        for key in sorted(_LATEX_MAP, key=len, reverse=True):
+            inner = re.sub(re.escape(key) + r"(?![A-Za-z])", _LATEX_MAP[key], inner)
+        inner = re.sub(r"\\text\{([^}]*)\}", r"\1", inner)
+        inner = re.sub(r"\\(?:mathbf|mathrm|textbf)\{([^}]*)\}", r"\1", inner)
+        inner = re.sub(r"\^\{?([0-9n])\}?", lambda m: {"2": "²", "3": "³"}.get(m.group(1), "^" + m.group(1)), inner)
+        return inner.replace("\\", "").strip()
+
+    return re.sub(r"\$([^$\n]+)\$", _convert, text)
+
+
 def _inline(text, unicode_ok):
     """Convert inline Markdown (bold, italic, code) to ReportLab mini-HTML."""
+    text = _latex_to_text(text)
     text = _clean(text, unicode_ok)
 
     # Protect inline code first so its content is not touched by bold/italic.
